@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    scroll-behavior: smooth;
+}
+
+.input-blue {
+    background: #356492;
+}
+
+input::placeholder {
+    color: #c8d2e0;
+}
+
+.no-arrow {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: "";
+}
+
+.btn {
+    transition: all 0.5s;
+}
+
+.darker {
+    background-color: #1b4f829a;
+}
+
+.lighter {
+    background-color: #1c4f82c7;
+}
+
+.dark-secondary {
+    background-color: #4e46e5d8;
+}
+
+.showcase {
+    background: linear-gradient(
+            to top,
+            rgba(28, 80, 130, 0.9) 20%,
+            rgba(76, 29, 149, 0.4) 60%
+        ),
+        url(/img/business3.jpeg) no-repeat bottom center/cover;
+}
+
+/* .history {
+    background: linear-gradient(to top, #1c1c1cf5 100%, rgba(15, 1, 53, 0.897) 100%), url(/img/business3.jpeg) no-repeat bottom center/cover;
+
+} */
+
+/* Patched up DaisyUI collapse 
+https://github.com/saadeghi/daisyui/blob/master/src/components/unstyled/collapse.css
+https://github.com/saadeghi/daisyui/blob/master/src/components/styled/collapse.css
+*/
+
+.collapse {
+    @apply relative grid overflow-hidden;
+    grid-template-columns: auto 50px;
+}
+
+.collapse-title {
+    @apply col-span-2 col-start-1 row-start-1;
+}
+
+.collapse > input[type="checkbox"] {
+    @apply appearance-none opacity-0;
+    /* @apply col-start-2 row-start-1; */
+}
+
+.collapse-content {
+    @apply col-span-2 col-start-1 row-start-2 overflow-hidden;
+    max-height: 0px;
+}
+
+.collapse-open .collapse-content,
+.collapse:not(.collapse-close)
+    input[type="checkbox"]:checked
+    ~ .collapse-content {
+    max-height: 9000px;
+}
+
+.collapse:focus:not(.collapse-close) .collapse-content,
+.collapse:focus:not(.collapse-close) :where(.collapse-content) {
+    /* @apply pb-0; */
+    transition: unset;
+    max-height: 0px;
+}
+
+.collapse:not(.collapse-open):not(.collapse-close) .collapse-title {
+    cursor: unset;
+}
