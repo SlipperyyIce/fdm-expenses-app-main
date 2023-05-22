@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useRef } from "react";
 import {db} from "../lib/firebase";
 import {storage} from "../lib/firebase";
 import { collection, addDoc} from "firebase/firestore"; 
@@ -7,10 +7,28 @@ import { useContext } from "react";
 import { ref,uploadBytes  } from "firebase/storage";
 
 
+
 const ExpenseMenu = () => {
     const [ontoggle, setToggle] = useState(false); //For more no reciept section
     const [categoryId, setCategoryId] = useState(-1);
     const {user} = useContext(UserContext);
+
+    const fileInputRef = useRef(null);
+    const fileInputRef2 = useRef(null);
+    const amount = useRef(null);
+    const amount2 = useRef(null);
+    const category = useRef(null);
+    const category2 = useRef(null);
+    const currency = useRef(null);
+    const currency2 = useRef(null);
+  
+    const name = useRef(null);
+    const name2 = useRef(null);
+    const sortC = useRef(null);
+    const sortC2 = useRef(null);
+    const accountNo = useRef(null);
+    const accountNo2 = useRef(null);
+
     
 
     const inputFields: any = [
@@ -57,9 +75,10 @@ const ExpenseMenu = () => {
                                                 </span>
                                                 <input
                                                     type="text"
+                                                    ref={amount}
                                                     placeholder="10"
                                                     className="input input-bordered w-28 bg-neutral"></input>
-                                                <select className="no-arrow w-20 bg-[#0369a1] text-center focus:outline-none">
+                                                <select className="no-arrow w-20 bg-[#0369a1] text-center focus:outline-none" ref={currency}>
                                                     <option
                                                         selected
                                                         className="">
@@ -80,6 +99,7 @@ const ExpenseMenu = () => {
                                         <div className="form-control py-1">
                                             <div className="input-group  ">
                                                 <select
+                                                    ref={category}
                                                     id="typeSelect"
                                                     className="select select-bordered w-80 bg-neutral">
                                                     <option disabled selected>
@@ -104,6 +124,7 @@ const ExpenseMenu = () => {
                                                     Name
                                                 </span>
                                                 <input
+                                                    ref={name}
                                                     type="text"
                                                     placeholder="John Doe"
                                                     className="w-50  input input-bordered bg-neutral"></input>
@@ -114,6 +135,7 @@ const ExpenseMenu = () => {
                                                     Sort Code
                                                 </span>
                                                 <input
+                                                    ref={sortC}
                                                     type="text"
                                                     placeholder="XX-XX-XX"
                                                     className="w-50  input input-bordered bg-neutral"></input>
@@ -124,6 +146,7 @@ const ExpenseMenu = () => {
                                                     Account No.
                                                 </span>
                                                 <input
+                                                    ref={accountNo}
                                                     type="text"
                                                     placeholder="36829639"
                                                     className="w-50  input input-bordered bg-neutral"></input>
@@ -140,7 +163,7 @@ const ExpenseMenu = () => {
                                             <button className="btn w-36 border-none bg-secondary text-center outline hover:opacity-40 " onClick={addFile}>
                                                 Attach File
                                             </button>
-                                            <input type="file" id="input-field" name="input-field" style={{ display: 'none' }}></input>
+                                            <input type="file" ref={fileInputRef} id="input-field" name="input-field" style={{ display: 'none' }}></input>
                                                                        
                                         </div>
                                     </form>
@@ -175,9 +198,10 @@ const ExpenseMenu = () => {
                                                 </span>
                                                 <input
                                                     type="text"
+                                                    ref={amount2}
                                                     placeholder="10"
                                                     className="input input-bordered w-28 bg-neutral"></input>
-                                                <select className="no-arrow w-20 bg-secondary text-center focus:outline-none">
+                                                <select className="no-arrow w-20 bg-secondary text-center focus:outline-none" ref={currency2}>
                                                     <option
                                                         selected
                                                         className="">
@@ -198,6 +222,7 @@ const ExpenseMenu = () => {
                                         <div className="form-control ">
                                             <div className="input-group  ">
                                                 <select
+                                                    ref={category2}
                                                     value={categoryId}
                                                     defaultValue={categoryId}
                                                     onChange={(e) =>
@@ -233,6 +258,7 @@ const ExpenseMenu = () => {
                                                     Name
                                                 </span>
                                                 <input
+                                                    ref={name2}
                                                     type="text"
                                                     placeholder="John Doe"
                                                     className="w-50  input input-bordered bg-neutral"></input>
@@ -243,6 +269,7 @@ const ExpenseMenu = () => {
                                                     Sort Code
                                                 </span>
                                                 <input
+                                                    ref={sortC2}
                                                     type="text"
                                                     placeholder="XX-XX-XX"
                                                     className="w-50 input input-bordered bg-neutral"></input>
@@ -253,6 +280,7 @@ const ExpenseMenu = () => {
                                                     Account No.
                                                 </span>
                                                 <input
+                                                    ref={accountNo2}
                                                     type="text"
                                                     placeholder="36829639"
                                                     className="w-50 input input-bordered bg-neutral"></input>
@@ -268,7 +296,7 @@ const ExpenseMenu = () => {
                                             <button className="btn w-36 border-none bg-secondary text-center outline hover:opacity-40 " onClick={addFile2}>
                                                 Attach File
                                             </button>
-                                            <input type="file" id="input-field2" name="input-field" style={{ display: 'none' }}></input>
+                                            <input type="file" ref={fileInputRef2} id="input-field2" name="input-field" style={{ display: 'none' }}></input>
                                         </div>
 
                                         <p
@@ -308,14 +336,23 @@ const ExpenseMenu = () => {
         try {
             
             const imagesRef = ref(storage, 'reciepts/');
-            const file = inputfield.current.files[0];
+            const file = fileInputRef.current.files[0];
             uploadBytes(imagesRef, file);
             
                        
             const docRef = await addDoc(collection(db, "exp"), {
-              Amount: 20,  
-              UserId: user.uid,            
-    
+               
+              UserId: user.uid,
+              Date: new Date().getTime(),  
+              Amount: parseInt(amount.current.value) , 
+              Currency: currency.current.value, 
+              Category: category.current.value,
+              Card: {
+                Name: name.current.value,
+                SortCode: sortC.current.value,
+                AccountNo: parseInt(accountNo.current.value),
+              },
+                    
             });
             console.log("OLOL Document written with ID: ", docRef.id);
           } catch (e) {
