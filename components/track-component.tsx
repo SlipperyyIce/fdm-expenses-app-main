@@ -1,4 +1,46 @@
-const TrackComponent = () => {
+import { UserContext } from "../lib/context";
+import { useContext } from "react";
+import {db} from "../lib/firebase";
+import React, { useRef } from "react";
+import { doc, collection, query, where, getDocs} from "firebase/firestore"; 
+const TrackComponent = () => {   
+
+    // Make the API call
+    class Item {
+        constructor (date, amount, ccy, type, card, expense, appeal, statement, lineManager)  {
+        let dateString = new Date(date).toLocaleDateString(undefined,{ 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+        console.log(dateString);
+        this.date = dateString;
+        this.amount = amount;
+        this.ccy = ccy;
+        this.type = type;
+        this.card = card;
+        this.expense = expense;
+        this.appeal = appeal;
+        this.statement = statement;
+        this.lineManager = lineManager;      
+        }
+    }
+
+    async function getExpenses() {
+        const {user} = useContext(UserContext);
+        const q = query(collection(db, "exp"), where("UserId", "==", user.uid));
+    
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        const data = doc.data()
+        console.log(data['Date']);
+        });
+    }
+    getExpenses();
+
+
     const items = [
         {
             date: "Jul 5, 2021",
