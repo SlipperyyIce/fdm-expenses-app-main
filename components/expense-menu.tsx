@@ -338,8 +338,7 @@ const ExpenseMenu = () => {
             const imagesRef = ref(storage, 'reciepts/');
             const file = fileInputRef.current.files[0];
             uploadBytes(imagesRef, file);
-            
-                       
+    
             const docRef = await addDoc(collection(db, "exp"), {
                
               UserId: user.uid,
@@ -352,6 +351,11 @@ const ExpenseMenu = () => {
                 SortCode: sortC.current.value,
                 AccountNo: parseInt(accountNo.current.value),
               },
+                          
+              Expense: "Small",
+              Appeal: "None",
+              Statement: "None",
+              LineManager: "????",
                     
             });
             console.log("OLOL Document written with ID: ", docRef.id);
