@@ -2,7 +2,7 @@ import { UserContext } from "../lib/context";
 import { useContext, useState } from "react";
 import {db} from "../lib/firebase";
 import React, { useRef } from "react";
-import { doc, collection, query, where, getDocs} from "firebase/firestore"; 
+import { doc, collection, query, where, getDocs, orderBy} from "firebase/firestore"; 
 const TrackComponent = () => {   
     const items2 = [{
         date: "Apr 29, 2021",
@@ -94,17 +94,20 @@ const TrackComponent = () => {
     
     async function getExpenses() {
         const {user} = useContext(UserContext);
-        const q = query(collection(db, "exp"), where("UserId", "==", user.uid));
-    
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
+        try{
+            const q = query(collection(db, "exp"), where("UserId", "==", user.uid), orderBy("Date"));
         
-        const data = doc.data()
-        
-        createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager);
-        });
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+            
+            const data = doc.data()
+            
+            createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager);
+            });
 
-        setItems(items2);
+            setItems(items2);
+        }
+        catch (e) { console.log(e)}
     }
     getExpenses();
 

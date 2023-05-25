@@ -29,8 +29,24 @@ const ExpenseMenu = () => {
     const accountNo = useRef(null);
     const accountNo2 = useRef(null);
 
+    const [fileName, setFileName] = useState(" ");
+    const [fileName2, setFileName2] = useState(" ");
+
     
-    
+
+
+    const handleFileChange = () => {
+        let filePath = fileInputRef.current?.value || "";
+        setFileName(filePath ? filePath.split("\\").pop().replace(/^.*[\\\/]/, "") : "");
+        console.log("File Name:", fileName);
+    };
+
+    const handleFileChange2 = () => {
+        let filePath = fileInputRef2.current?.value || "";
+        setFileName2(filePath ? filePath.split("\\").pop().replace(/^.*[\\\/]/, "") : "");
+        
+    };
+
     const inputFields: any = [
         {
             "Travel Company": "WizzAir",
@@ -61,7 +77,7 @@ const ExpenseMenu = () => {
                                         Small Expense
                                     </h2>
                                     <p>This is for expenses under £250</p>
-                                    <form action="">
+                                    <form action="" id="form1">
                                         <div className="form-control py-1">
                                             <label className="label">
                                                 <span className="label-text mb-1">
@@ -77,10 +93,10 @@ const ExpenseMenu = () => {
                                                     type="text"
                                                     ref={amount}
                                                     placeholder="10"
-                                                    className="input input-bordered w-28 bg-neutral"></input>
+                                                    className="input input-bordered w-28 bg-neutral" required></input>
                                                 <select className="no-arrow w-20 bg-[#0369a1] text-center focus:outline-none" ref={currency}>
                                                     <option
-                                                        selected
+                                                        
                                                         className="">
                                                         GBP
                                                     </option>
@@ -97,12 +113,17 @@ const ExpenseMenu = () => {
                                         </div>
 
                                         <div className="form-control py-1">
+                                        <label className="label">
+                                                <span className="label-text mb-1">
+                                                    Catergory
+                                                </span>
+                                            </label>
                                             <div className="input-group  ">
                                                 <select
                                                     ref={category}
                                                     id="typeSelect"
                                                     className="select select-bordered w-80 bg-neutral">
-                                                    <option disabled selected>
+                                                    <option disabled >
                                                         Pick a category
                                                     </option>
                                                     <option>Travel</option>
@@ -127,7 +148,7 @@ const ExpenseMenu = () => {
                                                     ref={name}
                                                     type="text"
                                                     placeholder="John Doe"
-                                                    className="w-50  input input-bordered bg-neutral"></input>
+                                                    className="w-50  input input-bordered bg-neutral" required></input>
                                             </label>
 
                                             <label className="input-group py-1">
@@ -138,7 +159,7 @@ const ExpenseMenu = () => {
                                                     ref={sortC}
                                                     type="text"
                                                     placeholder="XX-XX-XX"
-                                                    className="w-50  input input-bordered bg-neutral"></input>
+                                                    className="w-50  input input-bordered bg-neutral" required></input>
                                             </label>
 
                                             <label className="input-group py-1">
@@ -149,7 +170,7 @@ const ExpenseMenu = () => {
                                                     ref={accountNo}
                                                     type="text"
                                                     placeholder="36829639"
-                                                    className="w-50  input input-bordered bg-neutral"></input>
+                                                    className="w-50  input input-bordered bg-neutral" required></input>
                                             </label>
                                         </div>
 
@@ -163,10 +184,13 @@ const ExpenseMenu = () => {
                                             <button className="btn w-36 border-none bg-secondary text-center outline hover:opacity-40 " onClick={addFile}>
                                                 Attach File
                                             </button>
-                                            <input type="file" ref={fileInputRef} id="input-field" name="input-field" style={{ display: 'none' }}></input>
-                                                                       
+                                            <label className="label"><span className="label-text" style={{ height:"10px"}}>
+                                                {fileName}</span>
+                                            </label>
+                                            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} id="input-field" name="input-field" style={{ display: 'none' }}></input>
+                                                                  
                                         </div>
-                                    </form>
+                                    
                                     <div className="card-actions justify-center">
                                         <button
                                             onClick={submitexpense}
@@ -175,6 +199,7 @@ const ExpenseMenu = () => {
                                             Submit
                                         </button>
                                     </div>
+                                    </form>
                                 </div>
                             </div>
 
@@ -184,7 +209,7 @@ const ExpenseMenu = () => {
                                         Large Expense
                                     </h2>
                                     <p>This is for expenses over £250</p>
-                                    <form action="">
+                                    <form action="" id="form2">
                                         <div className="form-control py-1">
                                             <label className="label">
                                                 <span className="label-text">
@@ -200,10 +225,10 @@ const ExpenseMenu = () => {
                                                     type="text"
                                                     ref={amount2}
                                                     placeholder="10"
-                                                    className="input input-bordered w-28 bg-neutral"></input>
+                                                    className="input input-bordered w-28 bg-neutral" required></input>
                                                 <select className="no-arrow w-20 bg-secondary text-center focus:outline-none" ref={currency2}>
                                                     <option
-                                                        selected
+                                                        
                                                         className="">
                                                         GBP
                                                     </option>
@@ -220,28 +245,27 @@ const ExpenseMenu = () => {
                                         </div>
 
                                         <div className="form-control ">
+                                            <label className="label">
+                                                <span className="label-text mb-1">
+                                                    Category
+                                                </span>
+                                            </label>
                                             <div className="input-group  ">
+                                                
                                                 <select
                                                     ref={category2}
-                                                    value={categoryId}
-                                                    defaultValue={categoryId}
-                                                    onChange={(e) =>
-                                                        setCategoryId(
-                                                            parseInt(
-                                                                e.target.value
-                                                            )
-                                                        )
-                                                    }
+                                                    
                                                     className="select select-bordered w-80 bg-neutral">
                                                     <option disabled value={-1}>
                                                         Pick category
                                                     </option>
-                                                    <option value={0}>
+                                                    <option>
                                                         Travel
                                                     </option>
-                                                    <option value={1}>
+                                                    <option>
                                                         Hospitality
                                                     </option>
+                                                    <option>Other</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -261,7 +285,7 @@ const ExpenseMenu = () => {
                                                     ref={name2}
                                                     type="text"
                                                     placeholder="John Doe"
-                                                    className="w-50  input input-bordered bg-neutral"></input>
+                                                    className="w-50  input input-bordered bg-neutral" required></input>
                                             </label>
 
                                             <label className="input-group py-1">
@@ -272,7 +296,7 @@ const ExpenseMenu = () => {
                                                     ref={sortC2}
                                                     type="text"
                                                     placeholder="XX-XX-XX"
-                                                    className="w-50 input input-bordered bg-neutral"></input>
+                                                    className="w-50 input input-bordered bg-neutral" required></input>
                                             </label>
 
                                             <label className="input-group py-1">
@@ -283,7 +307,7 @@ const ExpenseMenu = () => {
                                                     ref={accountNo2}
                                                     type="text"
                                                     placeholder="36829639"
-                                                    className="w-50 input input-bordered bg-neutral"></input>
+                                                    className="w-50 input input-bordered bg-neutral" required></input>
                                             </label>
                                         </div>
 
@@ -296,7 +320,10 @@ const ExpenseMenu = () => {
                                             <button className="btn w-36 border-none bg-secondary text-center outline hover:opacity-40 " onClick={addFile2}>
                                                 Attach File
                                             </button>
-                                            <input type="file" ref={fileInputRef2} id="input-field2" name="input-field" style={{ display: 'none' }}></input>
+                                            <label className="label"><span className="label-text" style={{ height:"10px"}}>
+                                                {fileName2}</span>
+                                            </label>
+                                            <input type="file" accept="image/*" ref={fileInputRef2} onChange={handleFileChange2} id="input-field2" name="input-field" style={{ display: 'none' }} required></input>
                                         </div>
 
                                         <p
@@ -312,16 +339,33 @@ const ExpenseMenu = () => {
                                             }}>
                                             Don't have a reciept? Click here.
                                         </p>
-                                    </form>
+                                    
 
-                                    <div className="card-actions justify-center">
-                                        <button
-                                            type="submit"
-                                            onClick={submitLexpense}
-                                            className="btn mt-1 mb-[-0.3rem] w-80  rounded-2xl border-2  border-transparent bg-indigo-600 font-semibold  text-white hover:opacity-40">
-                                            Submit
-                                        </button>
-                                    </div>
+                                        <div className="card-actions justify-center">
+                                            <button
+                                                type="submit"
+                                                onClick={submitLexpense}
+                                                className="btn mt-1 mb-[-0.3rem] w-80  rounded-2xl border-2  border-transparent bg-indigo-600 font-semibold  text-white hover:opacity-40">
+                                                Submit
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <a href={"#modal-1"} id="modal_lk" style={{display: "none"}}></a>
+                                <div
+                                        className="modal"
+                                        id={"modal-1"}>
+                                        <div className="modal-box">
+                                            <h3 className="text-lg font-bold">
+                                                Expense Submitted
+                                            </h3>
+                                            
+                                            <div className="modal-action">
+                                                <a href="#" className="btn">
+                                                    Close
+                                                </a>
+                                            </div>
+                                        </div>
                                 </div>
                             </div>
                             
@@ -331,52 +375,97 @@ const ExpenseMenu = () => {
             </div>
         </>
     );
+    document.getElementById("form1").addEventListener("submit", function(event) {
+        event.preventDefault();
+    });
+    document.getElementById("form2").addEventListener("submit", function(event) {
+        event.preventDefault();
+    });
     async function submitexpense(event: any) {
-
         try {
             
-            const imagesRef = ref(storage, 'reciepts/');
-            const file = fileInputRef.current.files[0];
-            uploadBytes(imagesRef, file);
-    
-            const docRef = await addDoc(collection(db, "exp"), {
-               
-              UserId: user.uid,
-              Date: new Date().getTime(),  
-              Amount: parseInt(amount.current.value) , 
-              Currency: currency.current.value, 
-              Category: category.current.value,
-              Card: {
-                Name: name.current.value,
-                SortCode: sortC.current.value,
-                AccountNo: parseInt(accountNo.current.value),
-              },
-                          
-              Expense: "Small",
-              Appeal: "None",
-              Statement: "None",
-              LineManager: "????",
-                    
-            });
-            console.log("OLOL Document written with ID: ", docRef.id);
-          } catch (e) {
+            if(document.getElementById("form1").checkValidity()){
+                const docRef = await addDoc(collection(db, "exp"), {
+                
+                UserId: user.uid,
+                Date: new Date().getTime(),  
+                Amount: parseInt(amount.current.value) , 
+                Currency: currency.current.value, 
+                Category: category.current.value,
+                Card: {
+                    Name: name.current.value,
+                    SortCode: sortC.current.value,
+                    AccountNo: parseInt(accountNo.current.value),
+                },
+                            
+                Expense: "Small",
+                Appeal: "None",
+                Statement: "None",
+                LineManager: "????",
+                        
+                });
+
+                const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
+                const file = fileInputRef.current.files[0];
+                uploadBytes(imagesRef, file);
+                
+                document.getElementById("modal_lk").click();
+            }
+        } catch (e) {
             console.error("Error adding document: ", e);
-          }
+        }
+        
     }
+
+    async function submitLexpense(event: any) {
+        try {
+            if(document.getElementById("form1").checkValidity()){
+                
+                const docRef = await addDoc(collection(db, "exp"), {
+                
+                UserId: user.uid,
+                Date: new Date().getTime(),  
+                Amount: parseInt(amount2.current.value) , 
+                Currency: currency2.current.value, 
+                Category: category2.current.value,
+                Card: {
+                    Name: name2.current.value,
+                    SortCode: sortC2.current.value,
+                    AccountNo: parseInt(accountNo2.current.value),
+                },
+                            
+                Expense: "Large",
+                Appeal: "None",
+                Statement: "None",
+                LineManager: "????",
+                        
+                });
+
+                const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
+                const file = fileInputRef.current.files[0];
+                uploadBytes(imagesRef, file);
+                console.log(fileInputRef.current.value);
+                console.log("OLOL Document written with ID: ", docRef.id);
+                document.getElementById("modal_lk").click();
+            }
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
+    }
+
     function addFile(event: any) {
         document.getElementById("input-field").click();
+        event.preventDefault();
     }
     function addFile2(event: any) {
         document.getElementById("input-field2").click();
+        
     }
+
 };
 
 export default ExpenseMenu;
 
-
-function submitLexpense(event: any) {
-    console.log("a2");
-}
 
 function setToggle(arg0: boolean): void {
     throw new Error("Function not implemented.");
