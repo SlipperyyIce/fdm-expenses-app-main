@@ -35,7 +35,7 @@ const Navbar = () => {
                                 <Link href="/">Home</Link>
                             </li>
                             <li>
-                                <a href="/#addX">Add Expense</a>
+                                <Link href="/#addX">Add Expense</Link>
                             </li>
                             <li>
                                 <Link href="/track">Track Expenses</Link>
@@ -57,12 +57,12 @@ const Navbar = () => {
                                     tabIndex={0}
                                     className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-100 p-2 shadow">
                                     <li>
-                                        <Link href={`/${user.email}`}>
+                                        
                                             <a className="justify-between">
                                                 Profile
                                                 {/* <span className="badge">New</span> */}
                                             </a>
-                                        </Link>
+                                        
                                     </li>
                                     <li>
                                         <a>Settings</a>

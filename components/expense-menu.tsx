@@ -77,7 +77,7 @@ const ExpenseMenu = () => {
                                         Small Expense
                                     </h2>
                                     <p>This is for expenses under £250</p>
-                                    <form action="" id="form1">
+                                    <form action="" id="form1" onSubmit={(e) => {e.preventDefault();}}>
                                         <div className="form-control py-1">
                                             <label className="label">
                                                 <span className="label-text mb-1">
@@ -209,7 +209,7 @@ const ExpenseMenu = () => {
                                         Large Expense
                                     </h2>
                                     <p>This is for expenses over £250</p>
-                                    <form action="" id="form2">
+                                    <form action="" id="form2" onSubmit={(e) => {e.preventDefault();}}>
                                         <div className="form-control py-1">
                                             <label className="label">
                                                 <span className="label-text">
@@ -375,16 +375,19 @@ const ExpenseMenu = () => {
             </div>
         </>
     );
-    document.getElementById("form1").addEventListener("submit", function(event) {
-        event.preventDefault();
-    });
-    document.getElementById("form2").addEventListener("submit", function(event) {
-        event.preventDefault();
-    });
+    
     async function submitexpense(event: any) {
+
         try {
             
             if(document.getElementById("form1").checkValidity()){
+
+                const file = fileInputRef.current.files[0];
+                var hasFile = false;
+                if(file){
+                    hasFile = true;
+                    
+                }
                 const docRef = await addDoc(collection(db, "exp"), {
                 
                 UserId: user.uid,
@@ -402,12 +405,14 @@ const ExpenseMenu = () => {
                 Appeal: "None",
                 Statement: "None",
                 LineManager: "????",
-                        
+                State: "Pending",
+                hasFile: hasFile,          
                 });
 
-                const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
-                const file = fileInputRef.current.files[0];
-                uploadBytes(imagesRef, file);
+                if(file){
+                    const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
+                    uploadBytes(imagesRef, file);
+                }
                 
                 document.getElementById("modal_lk").click();
             }
@@ -418,6 +423,7 @@ const ExpenseMenu = () => {
     }
 
     async function submitLexpense(event: any) {
+        
         try {
             if(document.getElementById("form1").checkValidity()){
                 
@@ -438,7 +444,8 @@ const ExpenseMenu = () => {
                 Appeal: "None",
                 Statement: "None",
                 LineManager: "????",
-                        
+                State: "Pending",   
+                
                 });
 
                 const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
@@ -465,6 +472,7 @@ const ExpenseMenu = () => {
 };
 
 export default ExpenseMenu;
+
 
 
 function setToggle(arg0: boolean): void {

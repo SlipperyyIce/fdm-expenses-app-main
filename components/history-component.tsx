@@ -1,5 +1,153 @@
+import { UserContext } from "../lib/context";
+import { useContext, useState , useEffect } from "react";
+import {db} from "../lib/firebase";
+import { collection, query, where, getDocs, orderBy, limit, startAt} from "firebase/firestore"; 
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 const HistoryComponent = () => {
-    const items = [
+    const storage = getStorage();
+    const {user} = useContext(UserContext);
+    const items2: Item[] = [];
+    const [items, setItems] = useState<Item[]>([]);
+    const [page, setPage] = useState(0);
+    var maxPage = 0;
+    const pageSize= 2;
+    var [renderedItems, setRender] = useState();
+        const imageExtensions = ["","png", "jpg", "jpeg", "pdf"];
+    
+    interface Item {
+        date: String,
+        amount: String,
+        ccy: String,
+        type: String,
+        card: String,
+        expense: String,
+        appeal : String,
+        statement: String,
+        lineManager: String,
+        img: String,
+        hasFile:Boolean,
+        Status: String,
+        rejectionStatement: String,
+
+    }
+
+    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile, status, rejectionStatement)  {
+        let dateString = new Date(date).toLocaleDateString(undefined,{ 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+
+        let currency;
+
+        switch (ccy) {
+            case "GBP":
+                currency = "£";
+                break;
+            case "USD":
+                currency = "$";
+                break;
+            case "EUR":
+                currency = "€";
+                break;
+            case "JPY":
+                currency = "¥";
+                break;
+            case "AUD":
+                currency = "A$";
+                break;
+            case "CAD":
+                currency = "C$";
+                break;
+            case "CNY":
+                currency = "¥";
+                break;
+            case "INR":
+                currency = "₹";
+                break;
+            case "HKD":
+                currency = "HK$";
+                break;
+            default:
+                currency = "";
+                break;
+        }
+        
+        
+        var newItem: Item = {
+            date: dateString,
+            amount: amount,
+            ccy: currency,
+            type: type,
+            card: card,
+            expense: expense,
+            appeal: appeal,
+            statement: statement,
+            lineManager: lineManager,
+            img: docId,
+            hasFile: hasFile,
+            Status: status,
+            rejectionStatement: rejectionStatement,    
+        };      
+        
+        items2.push(newItem);
+        
+    }
+const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "==", "Pending"), orderBy("Date", "desc"));    
+    async function getExpenses() {
+        
+        try{
+            const querySnapshot = await getDocs(q);
+            maxPage = Math.ceil(querySnapshot.size / pageSize) -1;
+            
+            const docs = querySnapshot.docs.slice(page*pageSize, (page*pageSize)+pageSize);
+            querySnapshot.forEach((doc) => {
+            
+            const data = doc.data()
+              
+            createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile,data.State, data.rejectionStatement);
+            });
+            
+            
+        }
+        catch (e) { console.log(e)}
+    }
+
+    function getUrl(docid, extensionIndex){
+        if (extensionIndex >= imageExtensions.length) {
+            console.log("No valid file found.");
+            return;
+        }
+        const fileRef = ref(storage, 'reciepts/' + docid);
+        //const fileRef = ref(storage, 'reciepts/' + docid + "." + imageExtensions[extensionIndex]);
+        
+        getDownloadURL(fileRef)
+            .then((url) => {
+                
+                
+                window.open(url);
+            })
+            .catch((error) => {
+                switch (error.code) {
+                    case 'storage/object-not-found':
+                        //getUrl(docid,extensionIndex + 1);
+                        break;
+                }
+                
+        });
+        
+    }
+    
+    getExpenses(); 
+    useEffect(() => {
+        setTimeout(() => {
+            setItems(items2.slice(page*pageSize, (page*pageSize)+pageSize));
+            console.log(items2);
+          }, 500);
+         
+    }, []);
+  
+    const items3 = [
         {
             date: "Jul 5, 2021",
             amount: 245.0,
@@ -116,7 +264,7 @@ const HistoryComponent = () => {
                             <p className="">Card</p>
                         </div>
 
-                        {items.map((item, index) => {
+                        {items3.map((item, index) => {
                             let appealLabel = item.statement.substring(
                                 0,
                                 Math.min(100, item.statement.length)
