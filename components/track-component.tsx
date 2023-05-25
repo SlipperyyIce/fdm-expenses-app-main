@@ -1,23 +1,19 @@
 import { UserContext } from "../lib/context";
-import { useContext, useState } from "react";
+import { useContext, useState , useEffect } from "react";
 import {db} from "../lib/firebase";
-import React, { useRef } from "react";
-import { doc, collection, query, where, getDocs, orderBy} from "firebase/firestore"; 
+import { collection, query, where, getDocs, orderBy, limit, startAt} from "firebase/firestore"; 
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+
 const TrackComponent = () => {   
-    const items2 = [{
-        date: "Apr 29, 2021",
-        amount: 34.0,
-        ccy: "£",
-        type: "Travel",
-        card: "Visa****",
-        expense: "Small",
-        appeal: "May 16, 2021",
-        statement:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias suscipit at nostrum cupiditate perspiciatis eveniet eos! Asperiores aperiam ipsum recusandae assumenda, tempore at commodi magni.",
-        lineManager: "John Hudson",
-    }];
+    const storage = getStorage();
+    const {user} = useContext(UserContext);
+    const items2: Item[] = [];
     const [items, setItems] = useState<Item[]>([]);
+    const [page, setPage] = useState(0);
+    var maxPage = 0;
+    const pageSize= 2;
     var [renderedItems, setRender] = useState();
+        const imageExtensions = ["","png", "jpg", "jpeg", "pdf"];
     
     interface Item {
         date: String,
@@ -29,9 +25,11 @@ const TrackComponent = () => {
         appeal : String,
         statement: String,
         lineManager: String,
+        img: String,
+        hasFile:Boolean,
     }
 
-    function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager)  {
+    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile)  {
         let dateString = new Date(date).toLocaleDateString(undefined,{ 
             year: 'numeric', 
             month: 'long', 
@@ -72,6 +70,8 @@ const TrackComponent = () => {
                 currency = "";
                 break;
         }
+        
+        
         var newItem: Item = {
             date: dateString,
             amount: amount,
@@ -82,35 +82,68 @@ const TrackComponent = () => {
             appeal: appeal,
             statement: statement,
             lineManager: lineManager,
-
+            img: docId,
+            hasFile: hasFile,
         };      
         
         items2.push(newItem);
         
-        
-        
-        
     }
-    
+const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "==", "Pending"), orderBy("Date", "desc"));    
     async function getExpenses() {
-        const {user} = useContext(UserContext);
-        try{
-            const q = query(collection(db, "exp"), where("UserId", "==", user.uid), orderBy("Date"));
         
+        try{
             const querySnapshot = await getDocs(q);
+            maxPage = Math.ceil(querySnapshot.size / pageSize) -1;
+            
+            const docs = querySnapshot.docs.slice(page*pageSize, (page*pageSize)+pageSize);
             querySnapshot.forEach((doc) => {
             
             const data = doc.data()
-            
-            createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager);
+              
+            createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile);
             });
-
-            setItems(items2);
+            
+            
         }
         catch (e) { console.log(e)}
     }
-    getExpenses();
 
+    function getUrl(docid, extensionIndex){
+        if (extensionIndex >= imageExtensions.length) {
+            console.log("No valid file found.");
+            return;
+        }
+        const fileRef = ref(storage, 'reciepts/' + docid);
+        //const fileRef = ref(storage, 'reciepts/' + docid + "." + imageExtensions[extensionIndex]);
+        
+        getDownloadURL(fileRef)
+            .then((url) => {
+                
+                
+                window.open(url);
+            })
+            .catch((error) => {
+                switch (error.code) {
+                    case 'storage/object-not-found':
+                        //getUrl(docid,extensionIndex + 1);
+                        break;
+                }
+                
+        });
+        
+    }
+    
+    getExpenses(); 
+    useEffect(() => {
+        setTimeout(() => {
+            setItems(items2.slice(page*pageSize, (page*pageSize)+pageSize));
+            console.log(items2);
+          }, 500);
+         
+    }, []);
+    
+    
     
     
     return (
@@ -130,10 +163,15 @@ const TrackComponent = () => {
                         </div>
                         <div id="div1">{renderedItems}</div>
                         {items.map((item, index) => {
-                            let appealLabel = ""
-                            if (appealLabel.length >= 20) {
+                            let appealLabel = item.statement.substring(
+                                0,
+                                Math.min(100, item.statement.length)
+                            );
+                            if (appealLabel.length >= 100) {
                                 appealLabel += "...";
                             }
+                            let attachment = "";
+                            if (item.hasFile){attachment="View Attachment"}
                             return (
                                 <div
                                     key={index}
@@ -184,9 +222,11 @@ const TrackComponent = () => {
                                         <p className="">
                                             Line Manager: {item.lineManager}
                                         </p>
-                                        <p className="ml-[-4rem] cursor-pointer text-sm underline hover:opacity-90">
-                                            View Attachment
-                                        </p>
+                                        <a 
+                                            onClick={() => { getUrl(item.img,0)}}
+                                            className="ml-[-4rem] cursor-pointer text-sm underline hover:opacity-90">
+                                            {attachment}
+                                        </a>
                                     </div>
 
                                     <div
@@ -206,15 +246,23 @@ const TrackComponent = () => {
                                             </div>
                                         </div>
                                     </div>
+                                    
                                 </div>
                             );
                         })}
 
                         <div className="dark-primary mx-0 flex h-10 w-full justify-end px-0 text-center text-sm text-slate-300 opacity-90">
                             <div className="btn-group px-20">
-                                <button className="btn">«</button>
-                                <button className="btn">Page 1</button>
-                                <button className="btn">»</button>
+                                <button className="btn" onClick={() =>{
+                                    if(page > 0){ setPage(page - 1)
+                                    setItems(items2.slice((page-1)*pageSize, ((page-1)*pageSize)+pageSize));
+                                    }}}>«</button>
+                                <button className="btn">Page {page+1}</button>
+                                <button className="btn" onClick={() =>{
+                                    if(page < maxPage){ setPage(page + 1)
+                                    
+                                    setItems(items2.slice((page+1)*pageSize, ((page+1)*pageSize)+pageSize));
+                                    }}}>»</button>
                             </div>
                         </div>
                     </div>
@@ -222,6 +270,8 @@ const TrackComponent = () => {
             </div>
         </>
     );
+    
+    
 };
 
 export default TrackComponent;
