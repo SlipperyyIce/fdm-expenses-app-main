@@ -11,7 +11,7 @@ const TrackComponent = () => {
     const [items, setItems] = useState<Item[]>([]);
     const [page, setPage] = useState(0);
     var maxPage = 0;
-    const pageSize= 2;
+    const pageSize= 15;
     var [renderedItems, setRender] = useState();
         const imageExtensions = ["","png", "jpg", "jpeg", "pdf"];
     
@@ -36,6 +36,15 @@ const TrackComponent = () => {
             day: 'numeric' 
         });
 
+        let dateString2 = new Date(appeal).toLocaleDateString(undefined,{ 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        if (isNaN(new Date(appeal)) )
+        { dateString2 = 'None'; }
+        
         let currency;
 
         switch (ccy) {
@@ -79,7 +88,7 @@ const TrackComponent = () => {
             type: type,
             card: card,
             expense: expense,
-            appeal: appeal,
+            appeal: dateString2,
             statement: statement,
             lineManager: lineManager,
             img: docId,

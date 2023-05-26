@@ -1,18 +1,20 @@
 import { UserContext } from "../lib/context";
 import { useContext, useState , useEffect } from "react";
 import {db} from "../lib/firebase";
-import { collection, query, where, getDocs, orderBy, limit, startAt} from "firebase/firestore"; 
+import { collection, query, where, getDocs, orderBy,updateDoc, doc } from "firebase/firestore"; 
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 const HistoryComponent = () => {
     const storage = getStorage();
     const {user} = useContext(UserContext);
     const items2: Item[] = [];
     const [items, setItems] = useState<Item[]>([]);
+    const [items3, setItems3] = useState<Item[]>([]);
     const [page, setPage] = useState(0);
+    const [txtarea, setTxtarea] = useState("");
     var maxPage = 0;
-    const pageSize= 2;
-    var [renderedItems, setRender] = useState();
-        const imageExtensions = ["","png", "jpg", "jpeg", "pdf"];
+    const pageSize= 15;
+    
+    const imageExtensions = ["","png", "jpg", "jpeg", "pdf"];
     
     interface Item {
         date: String,
@@ -26,7 +28,7 @@ const HistoryComponent = () => {
         lineManager: String,
         img: String,
         hasFile:Boolean,
-        Status: String,
+        status: String,
         rejectionStatement: String,
 
     }
@@ -38,6 +40,14 @@ const HistoryComponent = () => {
             day: 'numeric' 
         });
 
+        let dateString2 = new Date(appeal).toLocaleDateString(undefined,{ 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        if (isNaN(new Date(appeal)) )
+        { dateString2 = 'None'; }
         let currency;
 
         switch (ccy) {
@@ -81,19 +91,19 @@ const HistoryComponent = () => {
             type: type,
             card: card,
             expense: expense,
-            appeal: appeal,
+            appeal: dateString2,
             statement: statement,
             lineManager: lineManager,
             img: docId,
             hasFile: hasFile,
-            Status: status,
+            status: status,
             rejectionStatement: rejectionStatement,    
         };      
         
         items2.push(newItem);
         
     }
-const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "==", "Pending"), orderBy("Date", "desc"));    
+const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "!=", "Pending"));    
     async function getExpenses() {
         
         try{
@@ -138,113 +148,27 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
         
     }
     
+    async function appealExpense(text,id){
+        const expRef = doc(db, "exp", id + "");
+        
+        await updateDoc(expRef, {
+            "Appeal": new Date().getTime(),
+            "Statement": text,
+            "State": "Pending",
+        });
+        
+    }
+
     getExpenses(); 
     useEffect(() => {
         setTimeout(() => {
             setItems(items2.slice(page*pageSize, (page*pageSize)+pageSize));
-            console.log(items2);
+            setItems3(items2);
+            
           }, 500);
          
     }, []);
   
-    const items3 = [
-        {
-            date: "Jul 5, 2021",
-            amount: 245.0,
-            ccy: "£",
-            status: "Approved",
-            rejectionStatement: "None",
-            lineManager: "John Hudson",
-            type: "Hospitality",
-            card: "Visa****",
-            expense: "Small",
-            appeal: "None",
-            statement: "None",
-        },
-        {
-            date: "Apr 29, 2021",
-            amount: 34.0,
-            ccy: "£",
-            status: "Approved",
-            rejectionStatement: "None",
-            lineManager: "John Hudson",
-            type: "Hospitality",
-            card: "Visa****",
-            expense: "Small",
-            appeal: "May 6, 2021",
-            statement:
-                "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eos libero tempore sapiente perspiciatis iusto vero accusantium vel.",
-        },
-        {
-            date: "Apr 21, 2021",
-            amount: 575.0,
-            ccy: "£",
-            status: "Approved",
-            rejectionStatement: "None",
-            lineManager: "John Hudson",
-            type: "Hospitality",
-            card: "Visa****",
-            expense: "Small",
-            appeal: "None",
-            statement: "None",
-        },
-        {
-            date: "Mar 26, 2021",
-            amount: 54.57,
-            ccy: "£",
-            status: "Approved",
-            rejectionStatement: "None",
-            lineManager: "John Hudson",
-            type: "Hospitality",
-            card: "Visa****",
-            expense: "Small",
-            appeal: "None",
-            statement: "None",
-        },
-        {
-            date: "Mar 26, 2021",
-            amount: 54.57,
-            ccy: "£",
-            status: "Approved",
-            rejectionStatement: "None",
-            lineManager: "John Hudson",
-            type: "Hospitality",
-            card: "Visa****",
-            expense: "Small",
-            appeal: "None",
-            statement: "None",
-        },
-        {
-            date: "Mar 26, 2021",
-            amount: 54.57,
-            ccy: "£",
-            status: "Rejected",
-            rejectionStatement:
-                "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Doloremque maiores quisquam voluptas velit accusamus saepe nostrum vitae optio similique aut!",
-            lineManager: "John Hudson",
-            type: "Hospitality",
-            card: "Visa****",
-            expense: "Small",
-            appeal: "Apr 2, 2021",
-            statement:
-                "Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit dolor voluptatum quibusdam! Quia, magni optio?",
-        },
-        {
-            date: "Mar 26, 2021",
-            amount: 54.57,
-            ccy: "£",
-            status: "Rejected",
-            rejectionStatement:
-                "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Doloremque maiores quisquam voluptas velit accusamus saepe nostrum vitae optio similique aut!",
-            lineManager: "John Hudson",
-            type: "Hospitality",
-            card: "Mastercard****",
-            expense: "Small",
-            appeal: "None",
-            statement: "None",
-        },
-    ];
-
     return (
         <>
             <div className="h-min-screen history flex flex-col items-center justify-center">
@@ -261,10 +185,10 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
                             <p>Rejection Statements</p>
                             <p className="">Status</p>
                             <p className="">Line Manager</p>
-                            <p className="">Card</p>
+                            <p className="">Card Account No.</p>
                         </div>
 
-                        {items3.map((item, index) => {
+                        {items.map((item, index) => {
                             let appealLabel = item.statement.substring(
                                 0,
                                 Math.min(100, item.statement.length)
@@ -347,9 +271,13 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
                                             Appeal: {item.appeal}
                                         </p>
                                         <p className="">Type: {item.type}</p>
-                                        <p className="cursor-pointer text-sm underline hover:opacity-90">
+                                        {item.hasFile ?<a 
+                                            onClick={() => { getUrl(item.img,0)}}
+                                            className=" cursor-pointer text-sm underline hover:opacity-90">
                                             View Attachment
-                                        </p>
+                                        </a> : (
+                                            <p></p>
+                                        )}
                                     </div>
 
                                     <div
@@ -420,6 +348,7 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
                                                 Add Appeal Statement:
                                             </p>
                                             <textarea
+                                                onChange={(e) => {setTxtarea(e.target.value)}}
                                                 className="textarea textarea-bordered my-3 h-44 w-full border-2 border-slate-400"
                                                 placeholder="Text here..."></textarea>
                                             <div className="flex-rows justofy-center modal-action flex items-center">
@@ -428,6 +357,12 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
                                                 </a>
                                                 <a
                                                     href="#"
+                                                    onClick={() => {
+                                                        appealExpense(txtarea,item.img)
+                                                        const filter = (items3.filter((itm, i) => i !== ((page)*pageSize) +index));    
+                                                        setItems3(filter);                                              
+                                                        setItems(filter.slice((page)*pageSize, ((page)*pageSize)+pageSize)); 
+                                                    }}
                                                     type="submit"
                                                     className="btn btn-primary">
                                                     Submit
@@ -439,10 +374,17 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
                             );
                         })}
                         <div className="dark-primary mx-0 flex h-10 w-full justify-end px-0 text-center text-sm text-slate-300 opacity-90">
-                            <div className="btn-group px-4">
-                                <button className="btn">«</button>
-                                <button className="btn">Page 1</button>
-                                <button className="btn">»</button>
+                        <div className="btn-group px-20">
+                                <button className="btn" onClick={() =>{
+                                    if(page > 0){ setPage(page - 1)
+                                    setItems(items3.slice((page-1)*pageSize, ((page-1)*pageSize)+pageSize));
+                                    }}}>«</button>
+                                <button className="btn">Page {page+1}</button>
+                                <button className="btn" onClick={() =>{
+                                    if(page < maxPage){ setPage(page + 1)
+                                    
+                                    setItems(items3.slice((page+1)*pageSize, ((page+1)*pageSize)+pageSize));
+                                    }}}>»</button>
                             </div>
                         </div>
                     </div>

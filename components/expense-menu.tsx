@@ -1,11 +1,10 @@
 import React, { useState,useRef } from "react";
 import {db} from "../lib/firebase";
 import {storage} from "../lib/firebase";
-import { collection, addDoc} from "firebase/firestore"; 
+import { collection, addDoc, query,where,getDocs } from "firebase/firestore"; 
 import { UserContext } from "../lib/context";
 import { useContext } from "react";
 import { ref,uploadBytes  } from "firebase/storage";
-
 
 
 const ExpenseMenu = () => {
@@ -21,7 +20,7 @@ const ExpenseMenu = () => {
     const category2 = useRef(null);
     const currency = useRef(null);
     const currency2 = useRef(null);
-  
+    var ManangerName = "";
     const name = useRef(null);
     const name2 = useRef(null);
     const sortC = useRef(null);
@@ -33,8 +32,6 @@ const ExpenseMenu = () => {
     const [fileName2, setFileName2] = useState(" ");
 
     
-
-
     const handleFileChange = () => {
         let filePath = fileInputRef.current?.value || "";
         setFileName(filePath ? filePath.split("\\").pop().replace(/^.*[\\\/]/, "") : "");
@@ -46,6 +43,13 @@ const ExpenseMenu = () => {
         setFileName2(filePath ? filePath.split("\\").pop().replace(/^.*[\\\/]/, "") : "");
         
     };
+
+
+    async function getManagerName(){
+        const q = query(collection(db, "Employees"), where("EmployeeUID","array-contains", user.uid),); 
+        const querySnapshot = await getDocs(q);
+        for (const doc of querySnapshot.docs) {ManangerName = doc.data().ManagerName}
+    }
 
     const inputFields: any = [
         {
@@ -63,7 +67,7 @@ const ExpenseMenu = () => {
             "Reference Number": "XXXXXXXX",
         },
     ];
-
+    getManagerName();
     return (
         <>
             <div id="addX" className="hero min-h-screen bg-base-200 pb-10">
@@ -404,11 +408,11 @@ const ExpenseMenu = () => {
                 Expense: "Small",
                 Appeal: "None",
                 Statement: "None",
-                LineManager: "????",
+                LineManager: ManangerName,
                 State: "Pending",
                 hasFile: hasFile,          
                 });
-
+                console.log(ManangerName);
                 if(file){
                     const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
                     uploadBytes(imagesRef, file);

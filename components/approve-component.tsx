@@ -8,7 +8,9 @@ const ApproveComponent = () => {
     const storage = getStorage();
     const {user} = useContext(UserContext);
     const items2: Item[] = [];
+    var ManangerName = "";
     const [items, setItems] = useState<Item[]>([]);
+    const [items3, setItems3] = useState<Item[]>([]);
     const [page, setPage] = useState(0);
     const [txtarea, setTxtarea] = useState("");
     var maxPage = 0;
@@ -36,6 +38,15 @@ const ApproveComponent = () => {
             month: 'long', 
             day: 'numeric' 
         });
+
+        let dateString2 = new Date(appeal).toLocaleDateString(undefined,{ 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        if (isNaN(new Date(appeal)) )
+        { dateString2 = 'None'; }
 
         let currency;
 
@@ -80,7 +91,7 @@ const ApproveComponent = () => {
             type: type,
             card: card,
             expense: expense,
-            appeal: appeal,
+            appeal: dateString2,
             statement: statement,
             lineManager: lineManager,
             img: docId,
@@ -96,6 +107,8 @@ const ApproveComponent = () => {
             const q = query(collection(db, "Employees"), where("Manager Uid", "==", user.uid),); 
           
             const querySnapshot = await getDocs(q);
+            
+            for (const doc of querySnapshot.docs) {ManangerName = doc.data().ManagerName}
 
             for (const doc of querySnapshot.docs) {
                 const employeeUIDs = doc.data().EmployeeUID;
@@ -152,6 +165,7 @@ const ApproveComponent = () => {
         await updateDoc(expRef, {
             "rejectionStatement": text,
             "State": "Rejected",
+            "ManangerName": ManangerName,
         });
         
     }
@@ -160,6 +174,7 @@ const ApproveComponent = () => {
         const expRef = doc(db, "exp", id);
         await updateDoc(expRef, {
             "State": "Accepted",
+            "ManangerName": ManangerName,
         });
     }
     
@@ -167,7 +182,8 @@ const ApproveComponent = () => {
     useEffect(() => {
         setTimeout(() => {
             setItems(items2.slice(page*pageSize, (page*pageSize)+pageSize));
-            console.log(items2);
+            setItems3(items2);
+            
           }, 500);
          
     }, []);
@@ -302,7 +318,9 @@ const ApproveComponent = () => {
                                                     type="submit"
                                                     onClick={() => {
                                                         acceptExpense(item.img)
-                                                        setItems(items.filter((itm, i) => i !== index));
+                                                        const filter = (items3.filter((itm, i) => i !== ((page)*pageSize) +index));    
+                                                        setItems3(filter);                                              
+                                                        setItems(filter.slice((page)*pageSize, ((page)*pageSize)+pageSize)); 
                                                     }}
                                                     className="btn btn-primary">
                                                     
@@ -338,8 +356,10 @@ const ApproveComponent = () => {
                                                     href="#"
                                                     type="submit"
                                                     onClick={() => {
-                                                        rejectExpense(txtarea,item.img)
-                                                        setItems(items.filter((itm, i) => i !== index));
+                                                        rejectExpense(txtarea,item.img)     
+                                                        const filter = (items3.filter((itm, i) => i !== ((page)*pageSize) +index));    
+                                                        setItems3(filter);                                              
+                                                        setItems(filter.slice((page)*pageSize, ((page)*pageSize)+pageSize));                                                                                                         
                                                     }}
                                                     className="btn btn-primary">
                                                     Submit
@@ -358,13 +378,13 @@ const ApproveComponent = () => {
                             <div className="btn-group px-20">
                                 <button className="btn" onClick={() =>{
                                     if(page > 0){ setPage(page - 1)
-                                    setItems(items2.slice((page-1)*pageSize, ((page-1)*pageSize)+pageSize));
+                                    setItems(items3.slice((page-1)*pageSize, ((page-1)*pageSize)+pageSize));
                                     }}}>«</button>
                                 <button className="btn">Page {page+1}</button>
                                 <button className="btn" onClick={() =>{
                                     if(page < maxPage){ setPage(page + 1)
                                     
-                                    setItems(items2.slice((page+1)*pageSize, ((page+1)*pageSize)+pageSize));
+                                    setItems(items3.slice((page+1)*pageSize, ((page+1)*pageSize)+pageSize));
                                     }}}>»</button>
                             </div>
                         </div>
