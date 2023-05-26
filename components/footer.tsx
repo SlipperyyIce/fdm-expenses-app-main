@@ -12,9 +12,9 @@ const Footer = () => {
                     />
                     <p className="font-bold">FDM Expenses Ldt.</p>
                     <p className="mt-[-0.2rem] font-bold">
-                        Providing reliable tech since 2022
+                        Providing reliable tech since 2023
                     </p>
-                    <p>Copyright © 2022 - All right reserved</p>
+                    <p>Copyright © 2023 - All right reserved</p>
                 </div>
                 <div>
                     <div className="grid grid-flow-col gap-4">

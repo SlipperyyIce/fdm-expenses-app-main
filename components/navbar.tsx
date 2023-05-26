@@ -1,14 +1,31 @@
 import Link from "next/link";
 import { faFileShield } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext } from "react";
+import { useContext,useState, useEffect } from "react";
 import { UserContext } from "../lib/context";
 import { auth, provider } from "../lib/firebase";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-
+import { query, where , collection, orderBy, getDocs} from "firebase/firestore";
+import {db} from "../lib/firebase";
 const Navbar = () => {
     const { user } = useContext(UserContext);
-
+    const [isManager, setPerms] = useState(false);
+    const q = query(collection(db, "Managers"), where("ManagerId", "array-contains", user.uid));  
+     
+    async function checkPriv() {
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.size > 0){ isManager = true;}
+        
+    }
+    useEffect(() => {
+        setTimeout(() => {
+            setPerms(true);
+            
+          }, 5);
+         
+    }, []);
+    
+    checkPriv();
     return (
         <>
             <div className="navbar fixed z-10 h-24 bg-base-100 px-8 opacity-90">
@@ -43,7 +60,11 @@ const Navbar = () => {
                             <li>
                                 <Link href="/history">View History</Link>
                             </li>
-
+                            {isManager ? <li>
+                                <Link href="/approve">Approve Expenses</Link>
+                            </li> : (
+                                <p></p>
+                            )}
                             <div className="dropdown-end dropdown ml-3">
                                 <label
                                     tabIndex={0}

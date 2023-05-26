@@ -1,17 +1,18 @@
 import { UserContext } from "../lib/context";
 import { useContext, useState , useEffect } from "react";
 import {db} from "../lib/firebase";
-import { collection, query, where, getDocs, orderBy} from "firebase/firestore"; 
+import { collection, query, where, getDocs, orderBy, updateDoc, doc } from "firebase/firestore"; 
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
-const TrackComponent = () => {   
+const ApproveComponent = () => {   
     const storage = getStorage();
     const {user} = useContext(UserContext);
     const items2: Item[] = [];
     const [items, setItems] = useState<Item[]>([]);
     const [page, setPage] = useState(0);
+    const [txtarea, setTxtarea] = useState("");
     var maxPage = 0;
-    const pageSize= 2;
+    const pageSize= 15;
     var [renderedItems, setRender] = useState();
         const imageExtensions = ["","png", "jpg", "jpeg", "pdf"];
     
@@ -89,22 +90,33 @@ const TrackComponent = () => {
         items2.push(newItem);
         
     }
-const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "==", "Pending"), orderBy("Date", "desc"));    
+    
     async function getExpenses() {
-        
         try{
+            const q = query(collection(db, "Employees"), where("Manager Uid", "==", user.uid),); 
+          
             const querySnapshot = await getDocs(q);
-            maxPage = Math.ceil(querySnapshot.size / pageSize) -1;
-            
-            const docs = querySnapshot.docs.slice(page*pageSize, (page*pageSize)+pageSize);
-            querySnapshot.forEach((doc) => {
-            
-            const data = doc.data()
-              
-            createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile);
-            });
-            
-            
+
+            for (const doc of querySnapshot.docs) {
+                const employeeUIDs = doc.data().EmployeeUID;
+          
+                for (const id of employeeUIDs) {
+                    const q2 = query(
+                        collection(db, "exp"),
+                        where("UserId", "==", id),
+                        where("State", "==", "Pending"),
+                        orderBy("Date", "desc")
+                    );
+                
+                    const querySnapshot2 = await getDocs(q2);
+
+                    querySnapshot2.forEach((doc) => {           
+                        const data = doc.data()                   
+                        createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile,data.State, data.rejectionStatement);
+                        });                   
+                    }
+            }
+            maxPage = Math.ceil(items2.length / pageSize) -1;                                     
         }
         catch (e) { console.log(e)}
     }
@@ -133,6 +145,23 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
         });
         
     }
+
+    async function rejectExpense(text,id){
+        const expRef = doc(db, "exp", id + "");
+        
+        await updateDoc(expRef, {
+            "rejectionStatement": text,
+            "State": "Rejected",
+        });
+        
+    }
+
+    async function acceptExpense(id){
+        const expRef = doc(db, "exp", id);
+        await updateDoc(expRef, {
+            "State": "Accepted",
+        });
+    }
     
     getExpenses(); 
     useEffect(() => {
@@ -160,6 +189,7 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
                             <p className="text-left">Expense</p>
                             <p className=" text-right">Type</p>
                             <p className="">Card Account No.</p>
+                            
                         </div>
                         <div id="div1">{renderedItems}</div>
                         {items.map((item, index) => {
@@ -203,14 +233,17 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
 
                                     <div
                                         className={
-                                            "collapse-content mx-0 grid h-24 w-full grid-cols-5 items-center justify-center px-0 text-center text-slate-300 " +
+                                            "collapse-content mx-0 grid h-24 w-full grid-cols-6 items-center  px-0 text-center text-slate-300 " +
                                             (index % 2 === 0
                                                 ? "lighter"
                                                 : "darker")
                                         }>
-                                        <p className="pl-20 text-slate-400">
+                                        
+                                            
+                                        <p className="pl-30 text-slate-400">
                                             {item.expense} Expense
                                         </p>
+                                        
                                         <p className="ml-[-1rem]">
                                             Appeal: {item.appeal}
                                         </p>
@@ -219,13 +252,17 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
                                             className="text-left text-slate-400 hover:underline">
                                             Appeal Statement: {appealLabel}
                                         </a>
-                                        <p className="">
-                                            Line Manager: {item.lineManager}
-                                        </p>
+                                        
                                         <a 
                                             onClick={() => { getUrl(item.img,0)}}
-                                            className="ml-[-4rem] cursor-pointer text-sm underline hover:opacity-90">
+                                            className=" cursor-pointer text-sm underline hover:opacity-90">
                                             {attachment}
+                                        </a>
+                                        <a href={ "#modal-approve-" + index} className="btn-neutral btn btn-outline btn-error btn-sm z-5 w-32 text-sm normal-case">
+                                            Accept Expense
+                                        </a>
+                                        <a href={ "#modal-rejection-" + index} className="btn-neutral btn btn-outline btn-error btn-sm z-0 w-32 text-sm normal-case">
+                                            Reject Expense
                                         </a>
                                     </div>
 
@@ -246,8 +283,74 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
                                             </div>
                                         </div>
                                     </div>
+                                    <div
+                                        className="modal"
+                                        id={"modal-approve-" + index}>
+                                        <div className="modal-box">
+                                            <h3 className="text-lg font-bold">
+                                                Approve Expense
+                                            </h3>
+                                            <p className="py-4">
+                                                This is the confirmation for approving this expense
+                                            </p>                                           
+                                            <div className="flex-rows justofy-center modal-action flex items-center">
+                                                <a href="#" className="btn">
+                                                    Close
+                                                </a>
+                                                <a
+                                                    href="#"
+                                                    type="submit"
+                                                    onClick={() => {
+                                                        acceptExpense(item.img)
+                                                        setItems(items.filter((itm, i) => i !== index));
+                                                    }}
+                                                    className="btn btn-primary">
+                                                    
+                                                    Submit
+                                                </a>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                    <div
+                                        className="modal"
+                                        id={"modal-rejection-" + index}>
+                                        <div className="modal-box">
+                                            <h3 className="ml-2 text-lg font-bold">
+                                                Reject Expense
+                                            </h3>
+                                            
+                                            <p className="my-3 ml-2">
+                                                Add Rejection Statement:
+                                            </p>
+                                            <textarea
+                                                onChange={(e) => {setTxtarea(e.target.value)}}
+                                                className="textarea textarea-bordered my-3 h-44 w-full border-2 border-slate-400"
+                                                placeholder="Text here...">                                           
+
+                                            </textarea>  
+
+                                            <div className="flex-rows justofy-center modal-action flex items-center">
+                                                <a href="#" className="btn">
+                                                    Close
+                                                </a>
+                                                <a
+                                                    href="#"
+                                                    type="submit"
+                                                    onClick={() => {
+                                                        rejectExpense(txtarea,item.img)
+                                                        setItems(items.filter((itm, i) => i !== index));
+                                                    }}
+                                                    className="btn btn-primary">
+                                                    Submit
+                                                </a>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
                                     
                                 </div>
+                                
                             );
                         })}
 
@@ -274,4 +377,4 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
     
 };
 
-export default TrackComponent;
+export default ApproveComponent;
