@@ -86,7 +86,7 @@ const LoginContent = () => {
                         Forgot Password ?
                     </span>
                 </form>
-                <SignInGoogleButton></SignInGoogleButton>
+                
             </div>
         </div>
     );
