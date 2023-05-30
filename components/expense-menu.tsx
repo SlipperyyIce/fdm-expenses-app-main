@@ -10,46 +10,46 @@ import { ref,uploadBytes  } from "firebase/storage";
 const ExpenseMenu = () => {
     const [ontoggle, setToggle] = useState(false); //For more no reciept section
     const [categoryId, setCategoryId] = useState(-1);
-    const {user} = useContext(UserContext);
+    const {user} = useContext(UserContext) as any;
 
-    const fileInputRef = useRef(null);
-    const fileInputRef2 = useRef(null);
-    const amount = useRef(null);
-    const amount2 = useRef(null);
-    const category = useRef(null);
-    const category2 = useRef(null);
-    const currency = useRef(null);
-    const currency2 = useRef(null);
+    
+    const amount = useRef<HTMLInputElement>(null);
+    const amount2 = useRef<HTMLInputElement>(null);
+    const category = useRef<HTMLSelectElement>(null);
+    const category2 = useRef<HTMLSelectElement>(null);
+    const currency = useRef<HTMLSelectElement>(null);
+    const currency2 = useRef<HTMLSelectElement>(null);
     var ManangerName = "";
-    const name = useRef(null);
-    const name2 = useRef(null);
-    const sortC = useRef(null);
-    const sortC2 = useRef(null);
-    const accountNo = useRef(null);
-    const accountNo2 = useRef(null);
+    const name = useRef<HTMLInputElement>(null);
+    const name2 = useRef<HTMLInputElement>(null);
+    const sortC = useRef<HTMLInputElement>(null);
+    const sortC2 = useRef<HTMLInputElement>(null);
+    const accountNo = useRef<HTMLInputElement>(null);
+    const accountNo2 = useRef<HTMLInputElement>(null);
 
     const [fileName, setFileName] = useState(" ");
     const [fileName2, setFileName2] = useState(" ");
 
     
     const handleFileChange = () => {
-        let filePath = fileInputRef.current?.value || "";
-        setFileName(filePath ? filePath.split("\\").pop().replace(/^.*[\\\/]/, "") : "");
+        
+        const filePath = (document.getElementById('fileInput') as HTMLInputElement)?.value ||""  ;
+        setFileName(filePath?.split("\\").pop()?.replace(/^.*[\\\/]/, "") ?? "");
         if (filePath === "") {
-            document.getElementById('Closebtn').style.display = 'none';
+            (document.getElementById('Closebtn') as HTMLElement).style.display = 'none';
         }
         
-        else{document.getElementById('Closebtn').style.display = 'inline';}
+        else{(document.getElementById('Closebtn') as HTMLElement).style.display = 'inline';}
     };
 
     const handleFileChange2 = () => {
-        let filePath = fileInputRef2.current?.value || "";
-        setFileName2(filePath ? filePath.split("\\").pop().replace(/^.*[\\\/]/, "") : "");
+        const filePath = (document.getElementById('fileInput2') as HTMLInputElement)?.value ||""  ;
+        setFileName2(filePath?.split("\\").pop()?.replace(/^.*[\\\/]/, "") ?? "");
         if (filePath === "") {
-            document.getElementById('Closebtn2').style.display = 'none';
+            (document.getElementById('Closebtn2') as HTMLElement).style.display = 'none';
         }
         
-        else{document.getElementById('Closebtn2').style.display = 'inline';}
+        else{(document.getElementById('Closebtn') as HTMLElement).style.display = 'inline';}
         
     };
 
@@ -198,9 +198,9 @@ const ExpenseMenu = () => {
                                                 Attach File
                                             </button>
                                             <label className="label"><span className="label-text" style={{ height:"10px"}}>
-                                                {fileName} <button id="Closebtn" onClick={(e) => {e.preventDefault(); fileInputRef.current.value = ""; handleFileChange()}} style={{display:"none"}}>X</button></span>
+                                                {fileName} <button id="Closebtn" onClick={(e) => {e.preventDefault(); (document.getElementById("fileInput")as HTMLInputElement).value  = "" ; handleFileChange()}} style={{display:"none"}}>X</button></span>
                                             </label>
-                                            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} id="input-field" name="input-field" style={{ display: 'none' }}></input>
+                                            <input type="file" accept="image/*" id="fileInput" onChange={handleFileChange} name="input-field" style={{ display: 'none' }}></input>
                                                                   
                                         </div>
                                     
@@ -334,9 +334,9 @@ const ExpenseMenu = () => {
                                                 Attach File
                                             </button>
                                             <label className="label"><span className="label-text" style={{ height:"10px"}}>
-                                                {fileName2} <button id="Closebtn2" onClick={(e) => {e.preventDefault(); fileInputRef2.current.value = ""; handleFileChange2()}} style={{display:"none"}}>X</button></span>
+                                                {fileName2} <button id="Closebtn2" onClick={(e) => {e.preventDefault(); (document.getElementById("fileInput2")as HTMLInputElement).value  = "" ; handleFileChange2()}} style={{display:"none"}}>X</button></span>
                                             </label>
-                                            <input type="file" accept="image/*" ref={fileInputRef2} onChange={handleFileChange2} id="input-field2" name="input-field" style={{ display: 'none' }}></input>
+                                            <input type="file" accept="image/*" onChange={handleFileChange2} id="fileInput2" name="input-field" style={{ display: 'none' }}></input>
                                         </div>
 
                                         <p
@@ -393,25 +393,27 @@ const ExpenseMenu = () => {
 
         try {
             
-            if(document.getElementById("form1").checkValidity()){
+            const formElement = document.getElementById("form1") as HTMLFormElement;
+            if (formElement.checkValidity()){
 
-                const file = fileInputRef.current.files[0];
+                
+                const fileInput = document.getElementById("fileInput") as HTMLInputElement;
+                const file = fileInput?.files?.[0] || null;
                 var hasFile = false;
                 if(file){
-                    hasFile = true;
-                    console.log("att");
+                    hasFile = true;                  
                 }
                 const docRef = await addDoc(collection(db, "exp"), {
                 
                 UserId: user.uid,
                 Date: new Date().getTime(),  
-                Amount: parseFloat(amount.current.value) , 
-                Currency: currency.current.value, 
-                Category: category.current.value,
+                Amount: parseFloat(amount.current?.value || "0"),
+                Currency: currency.current?.value || "",
+                Category: category.current?.value || "",
                 Card: {
-                    Name: name.current.value,
-                    SortCode: sortC.current.value,
-                    AccountNo: parseInt(accountNo.current.value),
+                    Name: name.current?.value || "",
+                    SortCode: sortC.current?.value || "",
+                    AccountNo: parseInt(accountNo.current?.value || "0"),
                 },
                             
                 Expense: "Small",
@@ -428,7 +430,8 @@ const ExpenseMenu = () => {
                     uploadBytes(imagesRef, file);
                 }
                 
-                document.getElementById("modal_lk").click();
+                const modalElement = document.getElementById("modal_lk") as HTMLElement;
+                modalElement?.click();
             }
         } catch (e) {
             console.error("Error adding document: ", e);
@@ -439,21 +442,22 @@ const ExpenseMenu = () => {
     async function submitLexpense(event: any) {
         
         try {
-            const file = fileInputRef2.current.files[0];
-            
-            if(document.getElementById("form2").checkValidity() && file){
+            const fileInput = document.getElementById("fileInput2") as HTMLInputElement;
+            const file = fileInput?.files?.[0] || null;
+            const formElement = document.getElementById("form2") as HTMLFormElement;          
+            if(formElement.checkValidity() && file){
                 
                 const docRef = await addDoc(collection(db, "exp"), {
                 
                 UserId: user.uid,
                 Date: new Date().getTime(),  
-                Amount: parseFloat(amount2.current.value) , 
-                Currency: currency2.current.value, 
-                Category: category2.current.value,
+                Amount: parseFloat(amount2.current?.value || "0"),
+                Currency: currency2.current?.value || "",
+                Category: category2.current?.value || "",
                 Card: {
-                    Name: name2.current.value,
-                    SortCode: sortC2.current.value,
-                    AccountNo: parseInt(accountNo2.current.value),
+                    Name: name2.current?.value || "",
+                    SortCode: sortC2.current?.value || "",
+                    AccountNo: parseInt(accountNo2.current?.value || "0"),
                 },
                             
                 Expense: "Large",
@@ -468,7 +472,8 @@ const ExpenseMenu = () => {
                 const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
                 
                 uploadBytes(imagesRef, file);
-                document.getElementById("modal_lk").click();
+                const modalElement = document.getElementById("modal_lk") as HTMLElement;
+                modalElement?.click();
             }
         } catch (e) {
             console.error("Error adding document: ", e);
@@ -476,12 +481,14 @@ const ExpenseMenu = () => {
     }
 
     function addFile(event: any) {
-        document.getElementById("input-field").click();
+        const fileInputElement = document.getElementById("fileInput") as HTMLInputElement;
+        fileInputElement?.click();
         event.preventDefault();
     }
     function addFile2(event: any) {
-        document.getElementById("input-field2").click();
-        
+        const fileInputElement = document.getElementById("fileInput2") as HTMLInputElement;
+        fileInputElement?.click();
+        event.preventDefault();
     }
 
 };

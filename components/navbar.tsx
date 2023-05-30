@@ -10,7 +10,7 @@ import { query, where , collection, orderBy, getDocs} from "firebase/firestore";
 import {db} from "../lib/firebase";
 
 const Navbar = () => {
-    const { user } = useContext(UserContext);
+    const { user } = useContext(UserContext) as any;
     var isManager = false;
     const [isManager2, setPerms] = useState(false);
     const q = query(collection(db, "Managers"), where("ManagerId", "array-contains", user.uid));  

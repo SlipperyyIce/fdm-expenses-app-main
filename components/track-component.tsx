@@ -6,7 +6,7 @@ import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 const TrackComponent = () => {   
     const storage = getStorage();
-    const {user} = useContext(UserContext);
+    const {user} = useContext(UserContext) as any;
     const items2: Item[] = [];
     const [items, setItems] = useState<Item[]>([]);
     const [page, setPage] = useState(0);
@@ -17,7 +17,7 @@ const TrackComponent = () => {
     
     interface Item {
         date: String,
-        amount: String,
+        amount: number,
         ccy: String,
         type: String,
         card: String,
@@ -30,7 +30,18 @@ const TrackComponent = () => {
         
     }
 
-    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile)  {
+    async function createItem(date: string,
+        amount: number,
+        ccy: string,
+        type: string,
+        card: string,
+        expense: string,
+        appeal: string,
+        statement: string,
+        lineManager: string,
+        docId: string,
+        hasFile: boolean
+    ){  
         let dateString = new Date(date).toLocaleDateString(undefined,{ 
             year: 'numeric', 
             month: 'long', 
@@ -42,8 +53,8 @@ const TrackComponent = () => {
             month: 'long', 
             day: 'numeric' 
         });
-        
-        if (isNaN(new Date(appeal)) )
+        new Date(appeal)
+        if (isNaN(new Date(appeal).getDate()) )
         { dateString2 = 'None'; }
         
         let currency;
@@ -119,7 +130,7 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
         catch (e) { console.log(e)}
     }
 
-    function getUrl(docid, extensionIndex){
+    function getUrl(docid:String, extensionIndex:number){
         if (extensionIndex >= imageExtensions.length) {
             console.log("No valid file found.");
             return;
