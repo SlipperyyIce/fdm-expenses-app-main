@@ -410,7 +410,8 @@ const ExpenseMenu = () => {
                 Statement: "None",
                 LineManager: ManangerName,
                 State: "Pending",
-                hasFile: hasFile,          
+                hasFile: hasFile,
+                lastModified: new Date().getTime(),         
                 });
                 console.log(ManangerName);
                 if(file){
@@ -449,14 +450,12 @@ const ExpenseMenu = () => {
                 Statement: "None",
                 LineManager: "????",
                 State: "Pending",   
-                
+                lastModified: new Date().getTime(),
                 });
 
                 const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
                 const file = fileInputRef.current.files[0];
                 uploadBytes(imagesRef, file);
-                console.log(fileInputRef.current.value);
-                console.log("OLOL Document written with ID: ", docRef.id);
                 document.getElementById("modal_lk").click();
             }
         } catch (e) {

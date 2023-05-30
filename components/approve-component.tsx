@@ -30,9 +30,10 @@ const ApproveComponent = () => {
         lineManager: String,
         img: String,
         hasFile:Boolean,
+        lastModified:number,
     }
 
-    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile)  {
+    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile,lastMod)  {
         let dateString = new Date(date).toLocaleDateString(undefined,{ 
             year: 'numeric', 
             month: 'long', 
@@ -96,6 +97,7 @@ const ApproveComponent = () => {
             lineManager: lineManager,
             img: docId,
             hasFile: hasFile,
+            lastModified: lastMod,
         };      
         
         items2.push(newItem);
@@ -118,17 +120,18 @@ const ApproveComponent = () => {
                         collection(db, "exp"),
                         where("UserId", "==", id),
                         where("State", "==", "Pending"),
-                        orderBy("Date", "desc")
+                        orderBy("lastModified", "desc")
                     );
                 
                     const querySnapshot2 = await getDocs(q2);
 
                     querySnapshot2.forEach((doc) => {           
                         const data = doc.data()                   
-                        createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile,data.State, data.rejectionStatement);
+                        createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile,data.lastModified);
                         });                   
                     }
             }
+            items2.sort((a, b) => a.lastModified - b.lastModified);
             maxPage = Math.ceil(items2.length / pageSize) -1;                                     
         }
         catch (e) { console.log(e)}
@@ -166,6 +169,7 @@ const ApproveComponent = () => {
             "rejectionStatement": text,
             "State": "Rejected",
             "ManangerName": ManangerName,
+            lastModified: new Date().getTime(),
         });
         
     }
@@ -175,6 +179,7 @@ const ApproveComponent = () => {
         await updateDoc(expRef, {
             "State": "Accepted",
             "ManangerName": ManangerName,
+            lastModified: new Date().getTime(),
         });
     }
     

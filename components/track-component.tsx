@@ -27,6 +27,7 @@ const TrackComponent = () => {
         lineManager: String,
         img: String,
         hasFile:Boolean,
+        
     }
 
     async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile)  {
@@ -98,7 +99,7 @@ const TrackComponent = () => {
         items2.push(newItem);
         
     }
-const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "==", "Pending"), orderBy("Date", "desc"));    
+const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "==", "Pending"), orderBy("lastModified", "desc"));    
     async function getExpenses() {
         
         try{

@@ -103,7 +103,7 @@ const HistoryComponent = () => {
         items2.push(newItem);
         
     }
-const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "!=", "Pending"));    
+const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "!=", "Pending"),orderBy("lastModified", "desc"));    
     async function getExpenses() {
         
         try{
@@ -155,6 +155,7 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
             "Appeal": new Date().getTime(),
             "Statement": text,
             "State": "Pending",
+            lastModified: new Date().getTime(),
         });
         
     }
