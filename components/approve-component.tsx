@@ -6,7 +6,7 @@ import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 const ApproveComponent = () => {   
     const storage = getStorage();
-    const {user} = useContext(UserContext);
+    const {user} = useContext(UserContext) as any;
     const items2: Item[] = [];
     var ManangerName = "";
     const [items, setItems] = useState<Item[]>([]);
@@ -20,7 +20,7 @@ const ApproveComponent = () => {
     
     interface Item {
         date: String,
-        amount: String,
+        amount: number,
         ccy: String,
         type: String,
         card: String,
@@ -33,7 +33,20 @@ const ApproveComponent = () => {
         lastModified:number,
     }
 
-    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile,lastMod)  {
+    async function createItem(
+        date: string,
+        amount: number,
+        ccy: string,
+        type: string,
+        card: string,
+        expense: string,
+        appeal: string,
+        statement: string,
+        lineManager: string,
+        docId: string,
+        hasFile: boolean,
+        lastMod: number
+    )  {
         let dateString = new Date(date).toLocaleDateString(undefined,{ 
             year: 'numeric', 
             month: 'long', 
@@ -46,7 +59,7 @@ const ApproveComponent = () => {
             day: 'numeric' 
         });
         
-        if (isNaN(new Date(appeal)) )
+        if (isNaN(new Date(appeal).getDate()))
         { dateString2 = 'None'; }
 
         let currency;
@@ -139,7 +152,7 @@ const ApproveComponent = () => {
         catch (e) { console.log(e)}
     }
 
-    function getUrl(docid, extensionIndex){
+    function getUrl(docid:String, extensionIndex:number){
         if (extensionIndex >= imageExtensions.length) {
             console.log("No valid file found.");
             return;
@@ -164,7 +177,7 @@ const ApproveComponent = () => {
         
     }
 
-    async function rejectExpense(text,id){
+    async function rejectExpense(text:String,id:String){
         const expRef = doc(db, "exp", id + "");
         
         await updateDoc(expRef, {
@@ -176,8 +189,8 @@ const ApproveComponent = () => {
         
     }
 
-    async function acceptExpense(id){
-        const expRef = doc(db, "exp", id);
+    async function acceptExpense(id:String){
+        const expRef = doc(db, "exp", id + "");
         await updateDoc(expRef, {
             "State": "Accepted",
             "LineManager": ManangerName,

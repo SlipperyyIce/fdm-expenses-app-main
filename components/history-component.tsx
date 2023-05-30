@@ -5,7 +5,7 @@ import { collection, query, where, getDocs, orderBy,updateDoc, doc } from "fireb
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 const HistoryComponent = () => {
     const storage = getStorage();
-    const {user} = useContext(UserContext);
+    const {user} = useContext(UserContext) as any;
     const items2: Item[] = [];
     const [items, setItems] = useState<Item[]>([]);
     const [items3, setItems3] = useState<Item[]>([]);
@@ -18,7 +18,7 @@ const HistoryComponent = () => {
     
     interface Item {
         date: String,
-        amount: String,
+        amount: number,
         ccy: String,
         type: String,
         card: String,
@@ -35,7 +35,22 @@ const HistoryComponent = () => {
     }
     
 
-    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile, status, rejectionStatement, lastMod)  {
+    async function createItem(
+        date: string,
+        amount: number,
+        ccy: string,
+        type: string,
+        card: string,
+        expense: string,
+        appeal: string,
+        statement: string,
+        lineManager: string,
+        docId: string,
+        hasFile: boolean,
+        status: string,
+        rejectionStatement: string,
+        lastMod: number)  
+    {
         let dateString = new Date(date).toLocaleDateString(undefined,{ 
             year: 'numeric', 
             month: 'long', 
@@ -48,7 +63,7 @@ const HistoryComponent = () => {
             day: 'numeric' 
         });
         
-        if (isNaN(new Date(appeal)) )
+        if (isNaN(new Date(appeal).getDate()) )
         { dateString2 = 'None'; }
         let currency;
 
@@ -127,7 +142,7 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
         catch (e) { console.log(e)}
     }
 
-    function getUrl(docid, extensionIndex){
+    function getUrl(docid:String, extensionIndex:number){
         if (extensionIndex >= imageExtensions.length) {
             console.log("No valid file found.");
             return;
@@ -152,7 +167,7 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
         
     }
     
-    async function appealExpense(text,id){
+    async function appealExpense(text:String,id:String){
         const expRef = doc(db, "exp", id + "");
         
         await updateDoc(expRef, {
