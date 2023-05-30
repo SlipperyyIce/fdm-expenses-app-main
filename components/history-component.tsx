@@ -30,10 +30,12 @@ const HistoryComponent = () => {
         hasFile:Boolean,
         status: String,
         rejectionStatement: String,
+        lastModified: number,
 
     }
+    
 
-    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile, status, rejectionStatement)  {
+    async function createItem(date, amount, ccy, type, card, expense, appeal, statement, lineManager, docId, hasFile, status, rejectionStatement, lastMod)  {
         let dateString = new Date(date).toLocaleDateString(undefined,{ 
             year: 'numeric', 
             month: 'long', 
@@ -97,13 +99,14 @@ const HistoryComponent = () => {
             img: docId,
             hasFile: hasFile,
             status: status,
-            rejectionStatement: rejectionStatement,    
+            rejectionStatement: rejectionStatement, 
+            lastModified: lastMod, 
         };      
         
         items2.push(newItem);
         
     }
-const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "!=", "Pending"),orderBy("lastModified", "desc"));    
+const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("State", "!=", "Pending"));    
     async function getExpenses() {
         
         try{
@@ -115,8 +118,9 @@ const q = query(collection(db, "exp"), where("UserId", "==", user.uid),where("St
             
             const data = doc.data()
               
-            createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile,data.State, data.rejectionStatement);
+            createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile,data.State, data.rejectionStatement, data.lastModified);
             });
+            items2.sort((a, b) => b.lastModified - a.lastModified);
             
             
         }

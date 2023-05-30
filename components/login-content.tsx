@@ -1,5 +1,5 @@
-import { auth, provider } from "../lib/firebase";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth, firebase, provider } from "../lib/firebase";
+import { getAuth, signInWithPopup, GoogleAuthProvider,signInWithEmailAndPassword  } from "firebase/auth";
 import { useContext } from "react";
 import { UserContext } from "../lib/context";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,7 +27,7 @@ const LoginContent = () => {
                 </div>
             </div>
             <div className="bg-base flex w-1/2 flex-col items-center justify-center">
-                <form className="bg-base">
+                <form className="bg-base" onSubmit={(e) => {e.preventDefault();}}>
                     <h1 className="mb-1 text-3xl font-bold text-[#d4d4d4]">
                         Hello Again
                     </h1>
@@ -52,8 +52,8 @@ const LoginContent = () => {
                             className="border-none bg-base-100 pl-2 outline-none"
                             type="text"
                             name=""
-                            id=""
-                            placeholder="Email Address"
+                            id="email"
+                            placeholder="Email Address" required
                         />
                     </div>
                     <div className="flex items-center  rounded-2xl border-2 py-2 px-3">
@@ -72,8 +72,8 @@ const LoginContent = () => {
                             className="border-none bg-base-100 pl-2 outline-none"
                             type="text"
                             name=""
-                            id=""
-                            placeholder="Password"
+                            id="password"
+                            placeholder="Password" required
                         />
                     </div>
                     <button
@@ -133,8 +133,26 @@ function SignInGoogleButton() {
     );
 }
 
-function userLogIn(event: any) {
-    event.preventDefault();
+function userLogIn() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    
+    signInWithEmailAndPassword(auth,email, password)
+      .then((userCredential) => {
+        // Login successful, handle user data or redirect to another page
+        const user = userCredential.user;
+        console.log('User logged in:', user.uid);
+        
+      })
+      .catch((error) => {
+        // Login error, handle error message
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error('Login error:', errorCode, errorMessage);
+        
+      });
 }
+
+
 
 export default LoginContent;

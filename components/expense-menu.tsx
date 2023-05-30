@@ -35,12 +35,21 @@ const ExpenseMenu = () => {
     const handleFileChange = () => {
         let filePath = fileInputRef.current?.value || "";
         setFileName(filePath ? filePath.split("\\").pop().replace(/^.*[\\\/]/, "") : "");
-        console.log("File Name:", fileName);
+        if (filePath === "") {
+            document.getElementById('Closebtn').style.display = 'none';
+        }
+        
+        else{document.getElementById('Closebtn').style.display = 'inline';}
     };
 
     const handleFileChange2 = () => {
         let filePath = fileInputRef2.current?.value || "";
         setFileName2(filePath ? filePath.split("\\").pop().replace(/^.*[\\\/]/, "") : "");
+        if (filePath === "") {
+            document.getElementById('Closebtn2').style.display = 'none';
+        }
+        
+        else{document.getElementById('Closebtn2').style.display = 'inline';}
         
     };
 
@@ -119,7 +128,7 @@ const ExpenseMenu = () => {
                                         <div className="form-control py-1">
                                         <label className="label">
                                                 <span className="label-text mb-1">
-                                                    Catergory
+                                                    Category
                                                 </span>
                                             </label>
                                             <div className="input-group  ">
@@ -189,7 +198,7 @@ const ExpenseMenu = () => {
                                                 Attach File
                                             </button>
                                             <label className="label"><span className="label-text" style={{ height:"10px"}}>
-                                                {fileName}</span>
+                                                {fileName} <button id="Closebtn" onClick={(e) => {e.preventDefault(); fileInputRef.current.value = ""; handleFileChange()}} style={{display:"none"}}>X</button></span>
                                             </label>
                                             <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} id="input-field" name="input-field" style={{ display: 'none' }}></input>
                                                                   
@@ -321,13 +330,13 @@ const ExpenseMenu = () => {
                                                     Add Reciept (Compulsory)
                                                 </span>
                                             </label>
-                                            <button className="btn w-36 border-none bg-secondary text-center outline hover:opacity-40 " onClick={addFile2}>
+                                            <button className="btn w-36 border-none bg-secondary text-center outline hover:opacity-40 " onClick={(e) => {e.preventDefault(); addFile2(null)}}>
                                                 Attach File
                                             </button>
                                             <label className="label"><span className="label-text" style={{ height:"10px"}}>
-                                                {fileName2}</span>
+                                                {fileName2} <button id="Closebtn2" onClick={(e) => {e.preventDefault(); fileInputRef2.current.value = ""; handleFileChange2()}} style={{display:"none"}}>X</button></span>
                                             </label>
-                                            <input type="file" accept="image/*" ref={fileInputRef2} onChange={handleFileChange2} id="input-field2" name="input-field" style={{ display: 'none' }} required></input>
+                                            <input type="file" accept="image/*" ref={fileInputRef2} onChange={handleFileChange2} id="input-field2" name="input-field" style={{ display: 'none' }}></input>
                                         </div>
 
                                         <p
@@ -390,13 +399,13 @@ const ExpenseMenu = () => {
                 var hasFile = false;
                 if(file){
                     hasFile = true;
-                    
+                    console.log("att");
                 }
                 const docRef = await addDoc(collection(db, "exp"), {
                 
                 UserId: user.uid,
                 Date: new Date().getTime(),  
-                Amount: parseInt(amount.current.value) , 
+                Amount: parseFloat(amount.current.value) , 
                 Currency: currency.current.value, 
                 Category: category.current.value,
                 Card: {
@@ -413,7 +422,7 @@ const ExpenseMenu = () => {
                 hasFile: hasFile,
                 lastModified: new Date().getTime(),         
                 });
-                console.log(ManangerName);
+                
                 if(file){
                     const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
                     uploadBytes(imagesRef, file);
@@ -430,13 +439,15 @@ const ExpenseMenu = () => {
     async function submitLexpense(event: any) {
         
         try {
-            if(document.getElementById("form1").checkValidity()){
+            const file = fileInputRef2.current.files[0];
+            
+            if(document.getElementById("form2").checkValidity() && file){
                 
                 const docRef = await addDoc(collection(db, "exp"), {
                 
                 UserId: user.uid,
                 Date: new Date().getTime(),  
-                Amount: parseInt(amount2.current.value) , 
+                Amount: parseFloat(amount2.current.value) , 
                 Currency: currency2.current.value, 
                 Category: category2.current.value,
                 Card: {
@@ -448,13 +459,14 @@ const ExpenseMenu = () => {
                 Expense: "Large",
                 Appeal: "None",
                 Statement: "None",
-                LineManager: "????",
+                LineManager: ManangerName,
                 State: "Pending",   
                 lastModified: new Date().getTime(),
+                hasFile: true,
                 });
 
                 const imagesRef = ref(storage, ('reciepts/'+ docRef.id));
-                const file = fileInputRef.current.files[0];
+                
                 uploadBytes(imagesRef, file);
                 document.getElementById("modal_lk").click();
             }

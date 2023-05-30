@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from 'next/router';
 import { faFileShield } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext,useState, useEffect } from "react";
@@ -7,25 +8,35 @@ import { auth, provider } from "../lib/firebase";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { query, where , collection, orderBy, getDocs} from "firebase/firestore";
 import {db} from "../lib/firebase";
+
 const Navbar = () => {
     const { user } = useContext(UserContext);
-    const [isManager, setPerms] = useState(false);
+    var isManager = false;
+    const [isManager2, setPerms] = useState(false);
     const q = query(collection(db, "Managers"), where("ManagerId", "array-contains", user.uid));  
      
     async function checkPriv() {
         const querySnapshot = await getDocs(q);
-        if (querySnapshot.size > 0){ isManager = true;}
         
+        
+        querySnapshot.forEach((doc) => {           
+            isManager = true;
+                              
+            });                   
     }
+        
+    
+    
     useEffect(() => {
+        checkPriv();
         setTimeout(() => {
-            setPerms(true);
+            setPerms(isManager);
             
-          }, 5);
+          }, 505);
          
     }, []);
     
-    checkPriv();
+    
     return (
         <>
             <div className="navbar fixed z-10 h-24 bg-base-100 px-8 opacity-90">
@@ -60,7 +71,7 @@ const Navbar = () => {
                             <li>
                                 <Link href="/history">View History</Link>
                             </li>
-                            {isManager ? <li>
+                            {isManager2 ? <li>
                                 <Link href="/approve">Approve Expenses</Link>
                             </li> : (
                                 <p></p>
@@ -70,7 +81,7 @@ const Navbar = () => {
                                     tabIndex={0}
                                     className="avatar btn btn-ghost btn-circle">
                                     <div className="w-10 rounded-full">
-                                        <img src={user.photoURL} />
+                                        <img src="https://loremflickr.com/320/320/face" /*src={user.photoURL}*/ />
                                     </div>
                                 </label>
 
@@ -102,7 +113,13 @@ const Navbar = () => {
 };
 
 function SignOutButton() {
-    return <button onClick={() => auth.signOut()}>Sign Out</button>;
+    const router = useRouter();
+    return <button onClick={() => {
+        auth.signOut()
+        router.push('/', undefined, { shallow: true });
+    }}>
+    Sign Out</button>;
+    
 }
 
 export default Navbar;

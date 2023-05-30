@@ -114,25 +114,27 @@ const ApproveComponent = () => {
 
             for (const doc of querySnapshot.docs) {
                 const employeeUIDs = doc.data().EmployeeUID;
-          
-                for (const id of employeeUIDs) {
-                    const q2 = query(
-                        collection(db, "exp"),
-                        where("UserId", "==", id),
-                        where("State", "==", "Pending"),
-                        orderBy("lastModified", "desc")
-                    );
                 
+                for (const id of employeeUIDs) {
+                  (async function() {
+                    const q2 = query(
+                      collection(db, "exp"),
+                      where("UserId", "==", id),
+                      where("State", "==", "Pending"),
+                      orderBy("lastModified", "desc")
+                    );
+              
                     const querySnapshot2 = await getDocs(q2);
-
-                    querySnapshot2.forEach((doc) => {           
-                        const data = doc.data()                   
-                        createItem(data.Date, data.Amount, data.Currency, data.Category,data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile,data.lastModified);
-                        });                   
-                    }
+              
+                    querySnapshot2.forEach((doc) => {
+                      const data = doc.data();
+                      createItem(data.Date, data.Amount, data.Currency, data.Category, data.Card.SortCode, data.Expense, data.Appeal, data.Statement, data.LineManager, doc.id, data.hasFile, data.lastModified);
+                    });
+                  })();
+                }
             }
-            items2.sort((a, b) => a.lastModified - b.lastModified);
-            maxPage = Math.ceil(items2.length / pageSize) -1;                                     
+            
+                                                
         }
         catch (e) { console.log(e)}
     }
@@ -168,7 +170,7 @@ const ApproveComponent = () => {
         await updateDoc(expRef, {
             "rejectionStatement": text,
             "State": "Rejected",
-            "ManangerName": ManangerName,
+            "LineManager": ManangerName,
             lastModified: new Date().getTime(),
         });
         
@@ -178,7 +180,7 @@ const ApproveComponent = () => {
         const expRef = doc(db, "exp", id);
         await updateDoc(expRef, {
             "State": "Accepted",
-            "ManangerName": ManangerName,
+            "LineManager": ManangerName,
             lastModified: new Date().getTime(),
         });
     }
@@ -186,6 +188,8 @@ const ApproveComponent = () => {
     getExpenses(); 
     useEffect(() => {
         setTimeout(() => {
+            items2.sort((a, b) => b.lastModified - a.lastModified)
+            maxPage = Math.ceil(items2.length / pageSize) -1; 
             setItems(items2.slice(page*pageSize, (page*pageSize)+pageSize));
             setItems3(items2);
             
