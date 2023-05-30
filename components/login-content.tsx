@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
 const LoginContent = () => {
-    const { user } = useContext(UserContext);
+    const { user } = useContext(UserContext) as any;
     
 
     return (
@@ -134,8 +134,9 @@ function SignInGoogleButton() {
 }
 
 function userLogIn() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = (document.getElementById('email') as HTMLInputElement).value;
+    
+    const password = (document.getElementById('password') as HTMLInputElement).value;
     
     signInWithEmailAndPassword(auth,email, password)
       .then((userCredential) => {

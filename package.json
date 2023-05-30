@@ -2,6 +2,8 @@
   "homepage": "https://slipperyyice.github.io/fdm-expenses-app-main",
   "private": true,
   "scripts": {
+    "predeploy" : "npm run build",
+    "deploy" : "gh-pages -d build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
@@ -23,6 +25,7 @@
     "@types/node": "17.0.4",
     "@types/react": "17.0.38",
     "autoprefixer": "^10.4.0",
+    "gh-pages": "^5.0.0",
     "postcss": "^8.4.5",
     "prettier": "^2.5.1",
     "prettier-plugin-tailwindcss": "^0.1.1",
