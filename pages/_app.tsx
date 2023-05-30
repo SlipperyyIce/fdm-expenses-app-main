@@ -3,7 +3,7 @@ import type { AppProps } from "next/app";
 import { UserContext } from "../lib/context";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, firestore } from "../lib/firebase";
+import { auth } from "../lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import LoginContent from "../components/login-content";
 import Footer from "../components/footer";
