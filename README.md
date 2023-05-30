@@ -1,6 +1,6 @@
 # FDM Expenses Appp
 
-This example project shows an expense application that I made using Google's firebase api.
+This example project shows an expense application that I made using Google's firebase api and next.js.
 The website works by letting signed-in users submit expenses which can then be either approved or rejected by a line manager.
 The app also provides information about an employee's own pending, accepted and reject applications and allows images to be attached and stored alongside submitted expenses.
 
