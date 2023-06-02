@@ -43,7 +43,8 @@ input::placeholder {
             rgba(28, 80, 130, 0.9) 20%,
             rgba(76, 29, 149, 0.4) 60%
         ),
-        url(/img/business3.jpeg) no-repeat bottom center/cover;
+        url(/business3.jpeg) no-repeat bottom center/cover
+        
 }
 
 /* .history {

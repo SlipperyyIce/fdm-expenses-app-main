@@ -10,7 +10,9 @@ import Footer from "../components/footer";
 
 function MyApp({ Component, pageProps }: AppProps) {
     const [user] = useAuthState(auth);
-    
+    useEffect(() => {
+        document.title = 'Expenses App';
+      }, []);
 
     return (
         <UserContext.Provider value={{ user }}>

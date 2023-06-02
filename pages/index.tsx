@@ -10,12 +10,12 @@ import { useContext } from "react";
 import { UserContext } from "../lib/context";
 
 const Home: NextPage = () => {
-    const { user } = useContext(UserContext);
+    const { user } = useContext(UserContext) as any;
 
     return (
         <>
             <Navbar></Navbar>
-
+            
             <Showcase></Showcase>
 
             <ExpenseMenu></ExpenseMenu>
