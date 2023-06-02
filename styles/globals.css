@@ -39,10 +39,8 @@ input::placeholder {
 }
 
 .showcase {
-    background-image: url(/business3.jpeg)
     
-        
-        
+    background: linear-gradient(to top, rgba(28, 80, 130, 0.9) 20%, rgba(76, 29, 149, 0.4) 60%);      
 }
 
 /* .history {
