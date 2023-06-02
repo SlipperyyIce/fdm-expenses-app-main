@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 html {
     scroll-behavior: smooth;
 }
@@ -38,12 +39,9 @@ input::placeholder {
 }
 
 .showcase {
-    background: linear-gradient(
-            to top,
-            rgba(28, 80, 130, 0.9) 20%,
-            rgba(76, 29, 149, 0.4) 60%
-        ),
-        url(/business3.jpeg) no-repeat bottom center/cover
+    background-image: url(/business3.jpeg)
+    
+        
         
 }
 
