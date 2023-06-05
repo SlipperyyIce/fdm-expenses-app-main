@@ -83,7 +83,7 @@ const ExpenseMenu = () => {
                 <div className="hero-content text-center">
                     <div className="">
                         <h1 className="my-8 text-4xl font-bold">Add Expense</h1>
-                        <div className="grid grid-cols-2 gap-10 ">
+                        <div className="flex flex-wrap gap-10">
                             <div className="card w-96 bg-primary text-primary-content">
                                 <div className="card-body items-center text-center">
                                     <h2 className="card-title text-2xl">
